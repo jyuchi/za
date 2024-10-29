@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a192f 100%);
+            color: #fff;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 400px;
+        }
+
+        .tab-buttons {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .tab-button.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            width: 150px;
+            margin: 0 0.5rem;
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            margin: 0 0.5rem;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 2rem;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .result {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .fraction-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .fraction-divider {
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 2px 0;
+        }
+
+        .fraction-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+        }
+
+        .fraction-input input {
+            width: 80px;
+            margin: 2px 0;
+        }
+
+        #decimalCalc, #fractionCalc {
+            display: none;
+        }
+
+        .active-calc {
+            display: block !important;
+        }
+    </style>
+    <!-- 在 head 中添加 -->
+    <script src="menu.js"></script>
+</head>
+<body>
+    <div class="calculator">
+        <h2>计算器</h2>
+        
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="switchCalc('decimal')">小数计算</button>
+            <button class="tab-button" onclick="switchCalc('fraction')">分数计算</button>
+        </div>
+
+        <!-- 小数计算器 -->
+        <div id="decimalCalc" class="active-calc">
+            <div class="input-group">
+                <input type="number" id="num1" placeholder="第一个数">
+                <select id="operator">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">×</option>
+                    <option value="/">÷</option>
+                </select>
+                <input type="number" id="num2" placeholder="第二个数">
+            </div>
+            <button onclick="calculateDecimal()">计算</button>
+        </div>
+
+        <!-- 分数计算器 -->
+        <div id="fractionCalc">
+            <div class="input-group">
+                <div class="fraction-input">
+                    <div class="fraction-container">
+                        <input type="number" id="num1-numerator" placeholder="分子">
+                        <div class="fraction-divider"></div>
+                        <input type="number" id="num1-denominator" placeholder="分母">
+                    </div>
+                    
+                    <select id="fraction-operator">
+                        <option value="+">+</option>
+                        <option value="-">-</option>
+                        <option value="*">×</option>
+                        <option value="/">÷</option>
+                    </select>
+
+                    <div class="fraction-container">
+                        <input type="number" id="num2-numerator" placeholder="分子">
+                        <div class="fraction-divider"></div>
+                        <input type="number" id="num2-denominator" placeholder="分母">
+                    </div>
+                </div>
+            </div>
+            <button onclick="calculateFraction()">计算</button>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function switchCalc(type) {
+            const decimalCalc = document.getElementById('decimalCalc');
+            const fractionCalc = document.getElementById('fractionCalc');
+            const buttons = document.querySelectorAll('.tab-button');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if (type === 'decimal') {
+                decimalCalc.classList.add('active-calc');
+                fractionCalc.classList.remove('active-calc');
+                buttons[0].classList.add('active');
+            } else {
+                fractionCalc.classList.add('active-calc');
+                decimalCalc.classList.remove('active-calc');
+                buttons[1].classList.add('active');
+            }
+            document.getElementById('result').textContent = '';
+        }
+
+        function calculateDecimal() {
+            const num1 = parseFloat(document.getElementById('num1').value);
+            const num2 = parseFloat(document.getElementById('num2').value);
+            const operator = document.getElementById('operator').value;
+            calculate(num1, num2, operator, false);
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                const temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        function calculateFraction() {
+            const num1Numerator = parseInt(document.getElementById('num1-numerator').value);
+            const num1Denominator = parseInt(document.getElementById('num1-denominator').value);
+            const num2Numerator = parseInt(document.getElementById('num2-numerator').value);
+            const num2Denominator = parseInt(document.getElementById('num2-denominator').value);
+            const operator = document.getElementById('fraction-operator').value;
+
+            if (isNaN(num1Numerator) || isNaN(num1Denominator) || 
+                isNaN(num2Numerator) || isNaN(num2Denominator)) {
+                document.getElementById('result').textContent = '请输入有效的分数';
+                return;
+            }
+
+            if (num1Denominator === 0 || num2Denominator === 0) {
+                document.getElementById('result').textContent = '分母不能为零';
+                return;
+            }
+
+            let resultNumerator, resultDenominator;
+
+            switch (operator) {
+                case '+':
+                    resultNumerator = num1Numerator * num2Denominator + num2Numerator * num1Denominator;
+                    resultDenominator = num1Denominator * num2Denominator;
+                    break;
+                case '-':
+                    resultNumerator = num1Numerator * num2Denominator - num2Numerator * num1Denominator;
+                    resultDenominator = num1Denominator * num2Denominator;
+                    break;
+                case '*':
+                    resultNumerator = num1Numerator * num2Numerator;
+                    resultDenominator = num1Denominator * num2Denominator;
+                    break;
+                case '/':
+                    if (num2Numerator === 0) {
+                        document.getElementById('result').textContent = '除数不能为零';
+                        return;
+                    }
+                    resultNumerator = num1Numerator * num2Denominator;
+                    resultDenominator = num1Denominator * num2Numerator;
+                    break;
+            }
+
+            // 约分
+            const divisor = gcd(resultNumerator, resultDenominator);
+            resultNumerator = resultNumerator / divisor;
+            resultDenominator = resultDenominator / divisor;
+
+            // 处理负号
+            if (resultDenominator < 0) {
+                resultNumerator = -resultNumerator;
+                resultDenominator = -resultDenominator;
+            }
+
+            // 如果分母为1，只显示整数
+            const resultText = resultDenominator === 1 ? 
+                `${resultNumerator}` : 
+                `${resultNumerator}/${resultDenominator}`;
+
+            document.getElementById('result').textContent = `计算结果: ${resultText}`;
+        }
+
+        function calculate(num1, num2, operator, isFraction = false) {
+            const resultElement = document.getElementById('result');
+
+            if (isNaN(num1) || isNaN(num2)) {
+                resultElement.textContent = '请输入有效的数字';
+                return;
+            }
+
+            let result;
+            switch (operator) {
+                case '+':
+                    result = num1 + num2;
+                    break;
+                case '-':
+                    result = num1 - num2;
+                    break;
+                case '*':
+                    result = num1 * num2;
+                    break;
+                case '/':
+                    if (num2 === 0) {
+                        resultElement.textContent = '除数不能为零';
+                        return;
+                    }
+                    result = num1 / num2;
+                    break;
+            }
+
+            if (!isFraction) {
+                result = Math.round(result * 10000) / 10000;
+            }
+            resultElement.textContent = `计算结果: ${result}`;
+        }
+
+        // 初始化显示小数计算器
+        switchCalc('decimal');
+    </script>
+</body>
+</html>

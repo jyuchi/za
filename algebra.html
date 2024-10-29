@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代数式化简</title>
+    <!-- 添加 nerdamer 库及其依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Solve.js"></script>
+    <script src="menu.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a192f 100%);
+            color: #fff;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .algebra-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 600px;  /* 改为固定宽度 */
+            margin: 0 auto;  /* 居中显示 */
+        }
+
+        .input-area {
+            margin: 1.5rem auto;  /* 上下margin保持不变，左右自动居中 */
+            width: 100%;  /* 宽度占满容器 */
+        }
+
+        textarea {
+            width: calc(100% - 2rem);  /* 考虑padding的宽度 */
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1.2rem;
+            padding: 1rem;
+            resize: vertical;
+            font-family: monospace;
+            display: block;  /* 确保是块级元素 */
+            margin: 0 auto;  /* 居中显示 */
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            justify-content: center;  /* 按钮居中 */
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            min-height: 50px;
+        }
+
+        .steps {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #a8a8a8;
+        }
+
+        .example-list {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #a8a8a8;
+        }
+
+        .example-item {
+            cursor: pointer;
+            padding: 0.3rem 0;
+            transition: color 0.3s ease;
+        }
+
+        .example-item:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="algebra-container">
+        <h2>代数式化简</h2>
+        
+        <div class="input-area">
+            <textarea id="expression" placeholder="输入代数式，例如：2x + 3x + 4"></textarea>
+        </div>
+
+        <div class="button-group">
+            <button onclick="simplifyExpression()">化简</button>
+            <button onclick="insertPower()">插入乘方(^)</button>
+            <button onclick="clearInput()">清除</button>
+        </div>
+
+        <div class="result" id="result">
+            结果将在这里显示
+        </div>
+
+        <div class="steps" id="steps"></div>
+
+        <div class="example-list">
+            <div>示例：（点击可直接使用）</div>
+            <div class="example-item" onclick="setExample('2x + 3x + 4')">2x + 3x + 4</div>
+            <div class="example-item" onclick="setExample('x^2 + 2x + x^2 - x')">x^2 + 2x + x^2 - x</div>
+            <div class="example-item" onclick="setExample('3(x + 2) - 2(x - 1)')">3(x + 2) - 2(x - 1)</div>
+            <div class="example-item" onclick="setExample('1/2 x^2 + 3/4 x - 2/3')">分数示例：1/2 x^2 + 3/4 x - 2/3</div>
+            <div class="example-item" onclick="setExample('2/3(x + 1) + 1/2(x - 1)')">分数示例：2/3(x + 1) + 1/2(x - 1)</div>
+        </div>
+    </div>
+
+    <script>
+        function setExample(example) {
+            document.getElementById('expression').value = example;
+        }
+
+        function clearInput() {
+            document.getElementById('expression').value = '';
+            document.getElementById('result').textContent = '结果将在这里显示';
+            document.getElementById('steps').textContent = '';
+        }
+
+        function insertPower() {
+            const textarea = document.getElementById('expression');
+            const cursorPos = textarea.selectionStart;
+            const textBefore = textarea.value.substring(0, cursorPos);
+            const textAfter = textarea.value.substring(cursorPos);
+            
+            textarea.value = textBefore + '^' + textAfter;
+            textarea.selectionStart = textarea.selectionEnd = cursorPos + 1;
+            textarea.focus();
+        }
+
+        function simplifyExpression() {
+            const input = document.getElementById('expression').value.trim();
+            const resultElement = document.getElementById('result');
+            const stepsElement = document.getElementById('steps');
+            
+            if (!input) {
+                resultElement.textContent = '请输入代数式';
+                return;
+            }
+
+            try {
+                const steps = [];
+                steps.push(`原式：${input}`);
+
+                // 展开表达式
+                let expanded = nerdamer(`expand(${input})`);
+                steps.push(`展开式：${expanded.toString()}`);
+
+                // 化简表达式
+                let simplified = nerdamer(`simplify(${expanded})`);
+                let result = simplified.toString();
+
+                // 优化显示格式
+                result = formatAlgebraicExpression(result);
+
+                steps.push(`化简结果：${result}`);
+                resultElement.textContent = `化简结果：${result}`;
+                stepsElement.innerHTML = steps.map(step => `<div>${step}</div>`).join('');
+            } catch (error) {
+                resultElement.textContent = `错误：${error.message}`;
+                stepsElement.textContent = '';
+            }
+        }
+
+        // 新增：格式化代数表达式的函数
+        function formatAlgebraicExpression(expr) {
+            // 移除所有空格
+            expr = expr.replace(/\s+/g, '');
+            
+            // 处理分数
+            expr = expr.replace(/\((-?\d+)\/(\d+)\)/g, '$1/$2');
+            
+            // 处理乘号
+            expr = expr.replace(/\*/g, '');
+            
+            // 标准化变量顺序（按字母顺序排列）
+            expr = standardizeVariableOrder(expr);
+            
+            // 处理正负号
+            expr = expr.replace(/\+\-/g, '-');
+            expr = expr.replace(/^\+/, '');
+            
+            return expr;
+        }
+
+        // 新增：标准化变量顺序的函数
+        function standardizeVariableOrder(expr) {
+            // 将表达式分割成项
+            const terms = expr.match(/[+-]?[^+-]+/g) || [];
+            
+            // 处理每一项
+            const processedTerms = terms.map(term => {
+                // 分离系数和变量部分
+                const match = term.match(/^([+-]?\d*\/?-?\d*)?([a-z]\^?\d*)*$/i);
+                if (!match) return term;
+                
+                let [, coefficient, variables] = match;
+                if (!coefficient) coefficient = term.startsWith('-') ? '-1' : '1';
+                if (!variables) return coefficient;
+
+                // 分离变量和指数
+                const varParts = variables.match(/[a-z]\^?\d*/gi) || [];
+                const sortedVars = varParts
+                    .map(v => {
+                        const [variable, power] = v.split('^');
+                        return {
+                            variable,
+                            power: power || '1'
+                        };
+                    })
+                    .sort((a, b) => {
+                        // 首先按变量名排序
+                        if (a.variable !== b.variable) {
+                            return a.variable.localeCompare(b.variable);
+                        }
+                        // 如果变量名相同，按指数降序排序
+                        return parseInt(b.power) - parseInt(a.power);
+                    })
+                    .map(v => v.power === '1' ? v.variable : `${v.variable}^${v.power}`)
+                    .join('');
+
+                return coefficient === '1' ? sortedVars :
+                       coefficient === '-1' ? `-${sortedVars}` :
+                       `${coefficient}${sortedVars}`;
+            });
+
+            // 重新组合所有项
+            return processedTerms.join('');
+        }
+
+        // 更新示例列表
+        const examples = [
+            '2x + 3x + 4',
+            'x^2 + 2x + x^2 - x',
+            '3(x + 2) - 2(x - 1)',
+            '1/2 x^2 + 3/4 x - 2/3',
+            '2/3(x + 1) + 1/2(x - 1)',
+            'x^2y + yx^2 + xy^2',  // 测试变量顺序
+            '(1/3)y^2 - 4x^2y - (4y^2 + (-6yx^2 + xy - y^2) - xy)'  // 复杂表达式
+        ];
+
+        document.querySelector('.example-list').innerHTML = `
+            <div>示例：（点击可直接使用）</div>
+            ${examples.map(ex => `
+                <div class="example-item" onclick="setExample('${ex}')">${ex}</div>
+            `).join('')}
+        `;
+    </script>
+</body>
+</html>

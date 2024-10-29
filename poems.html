@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>唐诗宋词</title>
+    <script src="menu.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a192f 100%);
+            color: #fff;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 80px auto 20px;
+            padding: 2rem;
+        }
+
+        .poems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .poem-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .poem-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .poem-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .poem-author {
+            font-size: 0.9rem;
+            color: #a8a8a8;
+        }
+
+        /* Modal 样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);  /* 初始透明 */
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;  /* 使用 visibility 代替 display */
+            transition: all 0.3s ease;  /* 添加过渡效果 */
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+            background: rgba(0, 0, 0, 0.8);  /* 显示时的背景色 */
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: auto;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            top: 50%;
+            transform: translateY(-40%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            max-height: 80vh;  /* 限制最大高度 */
+            display: flex;     /* 使用 flex 布局 */
+            flex-direction: column;
+            overflow: hidden;  /* 隐藏超出部分 */
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(-50%);
+            opacity: 1;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .close-button:hover {
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            flex-shrink: 0;  /* 防止标题被压缩 */
+        }
+
+        .modal-author {
+            text-align: center;
+            color: #a8a8a8;
+            margin-bottom: 2rem;
+            flex-shrink: 0;  /* 防止作者被压缩 */
+        }
+
+        .poem-text {
+            font-size: 1.2rem;
+            line-height: 2;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-tags {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            flex-shrink: 0;  /* 防止标签被压缩 */
+        }
+
+        .read-button {
+            margin-top: 1.5rem;
+            flex-shrink: 0;  /* 防止按钮被压缩 */
+        }
+
+        .search-bar {
+            margin-bottom: 2rem;
+            width: 100%;
+            display: flex;
+            gap: 1rem;
+            position: relative;  /* 为清除按钮定位 */
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.8rem 2.5rem 0.8rem 0.8rem;  /* 右侧留出空间放置清除按钮 */
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            display: none;  /* 默认隐藏 */
+            transition: color 0.3s ease;
+        }
+
+        .clear-search:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .clear-search.visible {
+            display: block;
+        }
+
+        .read-button {
+            margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 2rem auto 0;
+        }
+
+        .read-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .read-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .read-button::before {
+            content: "🔊";
+        }
+
+        .read-button.reading::before {
+            content: "⏸";
+        }
+
+        /* 在 style 部分添加标签相关样式 */
+        .tags-filter {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tag-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tag-button.active {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .poem-tags {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .poem-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            color: #a8a8a8;
+        }
+
+        .modal-tags {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .modal-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #a8a8a8;
+        }
+
+        /* 添加滚动容器 */
+        .modal-scroll-container {
+            overflow-y: auto;  /* 允许垂直滚动 */
+            padding-right: 1rem;  /* 为滚动条留出空间 */
+            margin-right: -1rem;  /* 补偿 padding */
+            flex: 1;  /* 占用剩余空间 */
+        }
+
+        /* 自定义滚动条样式 */
+        .modal-scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-scroll-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .modal-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .modal-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="搜索诗词..." 
+                   oninput="handleSearch(this.value)"
+                   id="searchInput">
+            <button class="clear-search" 
+                    onclick="clearSearch()" 
+                    id="clearButton">×</button>
+        </div>
+        <div class="tags-filter" id="tagsFilter">
+            <!-- 标签按钮将通过 JavaScript 动态生成 -->
+        </div>
+        <div class="poems-grid" id="poemsGrid"></div>
+    </div>
+
+    <div class="modal" id="poemModal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeModal(event)">×</button>
+            <h2 class="modal-title"></h2>
+            <div class="modal-author"></div>
+            <div class="modal-scroll-container">
+                <div class="poem-text"></div>
+            </div>
+            <div class="modal-tags"></div>
+            <button class="read-button" onclick="readPoem()">朗读诗词</button>
+        </div>
+    </div>
+
+    <script src="poems.js"></script>
+    <script>
+        // 直接使用 poemsData 变量
+        const poems = poemsData;
+
+        // 渲染诗词卡片
+        function renderPoems(poemsToRender = poems) {
+            const grid = document.getElementById('poemsGrid');
+            grid.innerHTML = poemsToRender.map(poem => `
+                <div class="poem-card" onclick="showPoem('${poem.title}')">
+                    <div class="poem-title">${poem.title}</div>
+                    <div class="poem-author">${poem.author}</div>
+                    <div class="poem-tags">
+                        ${poem.tags.map(tag => `
+                            <span class="poem-tag">${tag}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 处理搜索
+        function handleSearch(query) {
+            // 显示/隐藏清除按钮
+            const clearButton = document.getElementById('clearButton');
+            clearButton.classList.toggle('visible', query.length > 0);
+            
+            // 执行搜索
+            searchPoems(query);
+        }
+
+        // 清除搜索
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            document.getElementById('clearButton').classList.remove('visible');
+            renderPoems(); // 显示所有诗词
+        }
+
+        // 搜索诗词
+        window.searchPoems = function(query) {
+            const filtered = poems.filter(poem => 
+                poem.title.includes(query) || 
+                poem.author.includes(query) ||
+                poem.content.some(line => line.includes(query)) ||
+                poem.tags.some(tag => tag.includes(query))
+            );
+            renderPoems(filtered);
+        }
+
+        // 显示诗词详情
+        window.showPoem = function(title) {
+            const poem = poems.find(p => p.title === title);
+            if (!poem) return;
+
+            const modal = document.getElementById('poemModal');
+            modal.querySelector('.modal-title').textContent = poem.title;
+            modal.querySelector('.modal-author').textContent = poem.author;
+            modal.querySelector('.poem-text').innerHTML = poem.content.map(line => 
+                `<div>${line}</div>`
+            ).join('');
+            modal.querySelector('.modal-tags').innerHTML = poem.tags.map(tag =>
+                `<span class="modal-tag">${tag}</span>`
+            ).join('');
+            
+            // 先添加 show 类，触发动画
+            modal.classList.add('show');
+        }
+
+        // 统一的 closeModal 函数
+        window.closeModal = function(event) {
+            if (event.target.classList.contains('modal') || 
+                event.target.classList.contains('close-button')) {
+                // 停止朗读
+                if (currentUtterance) {
+                    speechSynthesis.cancel();
+                    currentUtterance = null;
+                    const button = document.querySelector('.read-button');
+                    button.classList.remove('reading');
+                    button.textContent = '朗读诗词';
+                }
+                // 关闭弹窗
+                document.getElementById('poemModal').classList.remove('show');
+            }
+        }
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTagsFilter();
+            renderPoems();
+        });
+
+        let currentUtterance = null;
+
+        function readPoem() {
+            const button = document.querySelector('.read-button');
+            
+            // 如果正在朗读，则停止
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+                currentUtterance = null;
+                button.classList.remove('reading');
+                button.textContent = '朗读诗词';
+                return;
+            }
+
+            const title = document.querySelector('.modal-title').textContent;
+            const author = document.querySelector('.modal-author').textContent;
+            const content = document.querySelector('.poem-text').textContent;
+            
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = `${title}，${author}。${content}`;
+            speech.lang = 'zh-CN';
+            speech.rate = 0.8; // 降低语速
+            
+            // 获取中文语音
+            const voices = speechSynthesis.getVoices();
+            const chineseVoice = voices.find(voice => voice.lang.includes('zh'));
+            if (chineseVoice) {
+                speech.voice = chineseVoice;
+            }
+
+            // 添加事件监听
+            speech.onstart = () => {
+                button.classList.add('reading');
+                button.textContent = '停止朗读';
+            };
+
+            speech.onend = () => {
+                button.classList.remove('reading');
+                button.textContent = '朗读诗词';
+                currentUtterance = null;
+            };
+
+            speech.onerror = () => {
+                button.classList.remove('reading');
+                button.textContent = '朗读失败';
+                currentUtterance = null;
+                setTimeout(() => {
+                    button.textContent = '朗读诗词';
+                }, 2000);
+            };
+
+            // 开始朗读
+            currentUtterance = speech;
+            speechSynthesis.speak(speech);
+        }
+
+        // 确保语音列表加载完成
+        speechSynthesis.onvoiceschanged = () => {
+            const voices = speechSynthesis.getVoices();
+            const hasChineseVoice = voices.some(voice => voice.lang.includes('zh'));
+            const button = document.querySelector('.read-button');
+            if (button) {
+                button.disabled = !hasChineseVoice;
+                if (!hasChineseVoice) {
+                    button.title = '未找到中文语音';
+                }
+            }
+        };
+
+        // 获取所有唯一标签
+        function getAllTags() {
+            const tagSet = new Set();
+            poems.forEach(poem => {
+                poem.tags.forEach(tag => tagSet.add(tag));
+            });
+            return Array.from(tagSet).sort();
+        }
+
+        // 渲染标签筛选器
+        function renderTagsFilter() {
+            const tags = getAllTags();
+            const tagsFilter = document.getElementById('tagsFilter');
+            tagsFilter.innerHTML = `
+                <button class="tag-button active" data-tag="all">全部</button>
+                ${tags.map(tag => `
+                    <button class="tag-button" data-tag="${tag}">${tag}</button>
+                `).join('')}
+            `;
+
+            // 添加点击事件
+            tagsFilter.querySelectorAll('.tag-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    // 更新按钮状态
+                    tagsFilter.querySelectorAll('.tag-button').forEach(btn => 
+                        btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // 筛选诗词
+                    const selectedTag = button.dataset.tag;
+                    if (selectedTag === 'all') {
+                        renderPoems();
+                    } else {
+                        const filtered = poems.filter(poem => 
+                            poem.tags.includes(selectedTag));
+                        renderPoems(filtered);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

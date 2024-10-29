@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>气质类型测试</title>
+    <script src="menu.js"></script>
+    <script src="questions.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a192f 100%);
+            color: #fff;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 80px auto 20px;
+            padding: 2rem;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .question-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+        }
+
+        .option-button {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .option-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-button.selected {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .result-card {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .result-description {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .characteristics-list, .suggestions-list {
+            margin-bottom: 2rem;
+        }
+
+        .list-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+
+        .list-item {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .list-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+        }
+
+        .restart-button {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 2rem auto 0;
+        }
+
+        .restart-button:hover {
+            background: rgba(76, 175, 80, 0.4);
+        }
+
+        .scores-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .score-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* 在已有的 style 标签中添加 */
+        .chart-container {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-label {
+            width: 80px;
+            margin-right: 1rem;
+            text-align: right;
+        }
+
+        .chart-fill {
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .chart-value {
+            margin-left: 1rem;
+            min-width: 40px;
+        }
+
+        .question-number {
+            font-size: 1.2rem;
+            color: #4CAF50;
+            margin-right: 1rem;
+            font-weight: bold;
+        }
+
+        /* 添加问题组样式 */
+        .questions-group {
+            display: grid;
+            gap: 1rem;
+        }
+
+        /* 添加分页导航样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .pagination-button {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-button:hover {
+            background: rgba(76, 175, 80, 0.4);
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 2rem;
+        }
+
+        .history-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-date {
+            color: #a8a8a8;
+            font-size: 0.9rem;
+        }
+
+        .history-scores {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .history-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .history-score-title {
+            font-size: 0.8rem;
+            color: #a8a8a8;
+        }
+
+        .history-score-value {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .clear-history {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .clear-history:hover {
+            background: rgba(244, 67, 54, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div id="resultCard" class="result-card">
+            <h2 class="result-title"></h2>
+            <div class="result-description"></div>
+            <div class="characteristics-list">
+                <div class="list-title">主要特征：</div>
+                <div class="characteristics-content"></div>
+            </div>
+            <div class="suggestions-list">
+                <div class="list-title">建议：</div>
+                <div class="suggestions-content"></div>
+            </div>
+            <button class="restart-button" onclick="restartTest()">重新测试</button>
+        </div>
+        <!-- 添加历史记录卡片 -->
+        <div id="historyCard" class="history-card">
+            <h2 class="history-title">历史测试记录</h2>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // 等待 DOM 和 questions.js 加载完成后再初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保 questionsData 已经定义
+            if (window.questionsData) {
+                initTest();
+                showHistory();
+            } else {
+                console.error('questionsData not loaded');
+            }
+        });
+
+        // 初始化变量
+        let currentQuestion = 0;
+        let scores = {
+            sanguine: 0,
+            choleric: 0,
+            melancholic: 0,
+            phlegmatic: 0
+        };
+
+        // 每页显示的题目数量
+        const QUESTIONS_PER_PAGE = 15;
+
+        // 获取当前页的题目
+        function getCurrentPageQuestions() {
+            const startIndex = Math.floor(currentQuestion / QUESTIONS_PER_PAGE) * QUESTIONS_PER_PAGE;
+            return questionsData.questions.slice(startIndex, startIndex + QUESTIONS_PER_PAGE);
+        }
+
+        // 显示当前页的所有题目
+        function showQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            const currentPageQuestions = getCurrentPageQuestions();
+            const questionsGroup = document.createElement('div');
+            questionsGroup.className = 'questions-group';
+
+            currentPageQuestions.forEach(question => {
+                const card = document.createElement('div');
+                card.className = 'question-card visible';
+                card.innerHTML = `
+                    <div class="question-text">
+                        <span class="question-number">${question.id}.</span>
+                        ${question.text}
+                    </div>
+                    <div class="options-container">
+                        ${questionsData.options.map((option, index) => `
+                            <button class="option-button ${question.selectedOption === index ? 'selected' : ''}"
+                                    onclick="selectOption(${question.id - 1}, ${index})">
+                                ${option.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                questionsGroup.appendChild(card);
+            });
+
+            container.appendChild(questionsGroup);
+
+            // 添加分页按钮
+            const totalPages = Math.ceil(questionsData.questions.length / QUESTIONS_PER_PAGE);
+            const currentPage = Math.floor(currentQuestion / QUESTIONS_PER_PAGE);
+            const isLastPage = currentPage >= totalPages - 1;
+
+            const pagination = document.createElement('div');
+            pagination.className = 'pagination';
+            pagination.innerHTML = `
+                <button class="pagination-button" 
+                        onclick="previousPage()"
+                        ${currentPage === 0 ? 'disabled' : ''}>
+                    上一页
+                </button>
+                <button class="pagination-button" 
+                        onclick="nextPage()"
+                        ${isLastPage ? '' : ''}>
+                    ${isLastPage ? '查看结果' : '下一页'}
+                </button>
+            `;
+            container.appendChild(pagination);
+
+            updateProgress();
+        }
+
+        // 选择选项
+        function selectOption(questionIndex, optionIndex) {
+            const question = questionsData.questions[questionIndex];
+            const option = questionsData.options[optionIndex];
+            
+            // 更新分数
+            if (question.selectedOption !== undefined) {
+                // 如果之前选过，先减去之前的分数
+                scores[question.type] -= questionsData.options[question.selectedOption].score;
+            }
+            
+            scores[question.type] += option.score;
+            question.selectedOption = optionIndex;
+
+            // 更新选中状态
+            const questionCard = document.querySelectorAll('.question-card')[questionIndex % QUESTIONS_PER_PAGE];
+            const buttons = questionCard.querySelectorAll('.option-button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            buttons[optionIndex].classList.add('selected');
+
+            // 检查当前页面是否已经全部回答
+            const currentPageQuestions = getCurrentPageQuestions();
+            const allAnswered = currentPageQuestions.every(q => q.selectedOption !== undefined);
+            
+            // 如果全部回答完，启用"下一页"按钮
+            const nextButton = document.querySelector('.pagination-button:last-child');
+            if (nextButton && allAnswered) {
+                nextButton.disabled = false;
+            }
+        }
+
+        // 上一页
+        function previousPage() {
+            currentQuestion = Math.max(0, currentQuestion - QUESTIONS_PER_PAGE);
+            showQuestions();
+        }
+
+        // 下一页
+        function nextPage() {
+            const currentPageQuestions = getCurrentPageQuestions();
+            // 检查当前页是否已全部回答
+            if (currentPageQuestions.every(q => q.selectedOption !== undefined)) {
+                if (currentQuestion + QUESTIONS_PER_PAGE >= questionsData.questions.length) {
+                    showResult();
+                } else {
+                    currentQuestion += QUESTIONS_PER_PAGE;
+                    showQuestions();
+                }
+            }
+        }
+
+        // 初始化测试
+        function initTest() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            currentQuestion = 0;
+            scores = {
+                sanguine: 0,
+                choleric: 0,
+                melancholic: 0,
+                phlegmatic: 0
+            };
+            // 设置所有题目默认选项为第一个选项（A）
+            questionsData.questions.forEach(q => {
+                q.selectedOption = 0;
+                scores[q.type] += questionsData.options[0].score;
+            });
+            showQuestions();
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const answeredCount = questionsData.questions.filter(q => q.selectedOption !== undefined).length;
+            const progress = (answeredCount / questionsData.questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // 显示结果
+        function showResult() {
+            const resultCard = document.getElementById('resultCard');
+            
+            // 计算总分并排序
+            const sortedScores = Object.entries(scores)
+                .map(([type, score]) => ({
+                    type,
+                    score,
+                    title: questionsData.results[type].title
+                }))
+                .sort((a, b) => b.score - a.score);
+
+            // 计算最高可能分数（每题2分，每种类型15题）
+            const maxPossibleScore = 30; // 15 * 2
+            const minPossibleScore = -30; // 15 * (-2)
+            const scoreRange = maxPossibleScore - minPossibleScore;
+
+            // 显示所有气质类型的得分
+            let resultHTML = `
+                <h2 class="result-title">测试结果</h2>
+                <div class="scores-container">
+                    ${sortedScores.map(item => `
+                        <div class="score-item">
+                            <div class="score-title">${item.title}</div>
+                            <div class="score-value">${item.score}分</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="chart-container">
+                    ${sortedScores.map(item => {
+                        // 将分数转换为0-100的百分比
+                        const percentage = ((item.score - minPossibleScore) / scoreRange) * 100;
+                        return `
+                            <div class="chart-bar">
+                                <div class="chart-label">${item.title}</div>
+                                <div class="chart-fill" style="width: ${percentage}%"></div>
+                                <div class="chart-value">${item.score}分</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="result-description">
+                    主导气质类型：${questionsData.results[sortedScores[0].type].description}
+                </div>
+            `;
+
+            // 显示主导气质的特征和建议
+            const mainType = sortedScores[0].type;
+            const mainResult = questionsData.results[mainType];
+            
+            resultHTML += `
+                <div class="characteristics-list">
+                    <div class="list-title">主要特征：</div>
+                    <div class="characteristics-content">
+                        ${mainResult.characteristics.map(item => 
+                            `<div class="list-item">${item}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                <div class="suggestions-list">
+                    <div class="list-title">建议：</div>
+                    <div class="suggestions-content">
+                        ${mainResult.suggestions.map(item => 
+                            `<div class="list-item">${item}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                <button class="restart-button" onclick="restartTest()">重新测试</button>
+            `;
+
+            resultCard.innerHTML = resultHTML;
+            resultCard.style.display = 'block';
+
+            // 在显示结果后保存记录
+            saveTestResult(scores);
+        }
+
+        // 重新开始测试
+        function restartTest() {
+            document.getElementById('resultCard').style.display = 'none';
+            initTest();
+        }
+
+        // 保存测试结果
+        function saveTestResult(scores) {
+            const history = JSON.parse(localStorage.getItem('personalityTestHistory') || '[]');
+            const result = {
+                date: new Date().toLocaleString(),
+                scores: scores,
+                mainType: Object.entries(scores)
+                    .reduce((a, b) => scores[a] > scores[b[0]] ? a : b[0])
+            };
+            history.push(result);
+            localStorage.setItem('personalityTestHistory', JSON.stringify(history));
+            showHistory();
+        }
+
+        // 显示历史记录
+        function showHistory() {
+            const historyList = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('personalityTestHistory') || '[]');
+            
+            let historyHTML = '';
+            if (history.length === 0) {
+                historyHTML = '<div class="history-item">暂无测试记录</div>';
+            } else {
+                historyHTML = history.reverse().map(item => `
+                    <div class="history-item">
+                        <div class="history-date">${item.date}</div>
+                        <div class="history-scores">
+                            ${Object.entries(item.scores).map(([type, score]) => `
+                                <div class="history-score">
+                                    <div class="history-score-title">${questionsData.results[type].title}</div>
+                                    <div class="history-score-value">${score}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="history-main-type">
+                            主导类型：${questionsData.results[item.mainType].title}
+                        </div>
+                    </div>
+                `).join('');
+                
+                historyHTML += `
+                    <button class="clear-history" onclick="clearHistory()">
+                        清除历史记录
+                    </button>
+                `;
+            }
+            
+            historyList.innerHTML = historyHTML;
+        }
+
+        // 清除历史记录
+        function clearHistory() {
+            if (confirm('确定要清除所有历史记录吗？')) {
+                localStorage.removeItem('personalityTestHistory');
+                showHistory();
+            }
+        }
+
+        // 初始化测试
+        initTest();
+    </script>
+</body>
+</html>

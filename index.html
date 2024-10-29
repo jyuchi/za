@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>静夜思 - 李白</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a192f 100%);
+            color: #fff;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .poem-container {
+            text-align: center;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .author {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #a8a8a8;
+            opacity: 0;
+            animation: fadeIn 1s ease 0.5s forwards;
+        }
+
+        .verse {
+            font-size: 1.8rem;
+            line-height: 2.5;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <script src="menu.js"></script>
+</head>
+<body>
+    <div class="poem-container">
+        <h1 class="title">静夜思</h1>
+        <div class="author">李白</div>
+        <div id="poem">
+            <div class="verse">床前明月光，</div>
+            <div class="verse">疑是地上霜。</div>
+            <div class="verse">举头望明月，</div>
+            <div class="verse">低头思故乡。</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const verses = document.querySelectorAll('.verse');
+            verses.forEach((verse, index) => {
+                verse.style.animation = `fadeIn 1s ease ${1 + index * 0.5}s forwards`;
+            });
+        });
+    </script>
+</body>
+</html>
