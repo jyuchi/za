@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone Apps</title>
+    <script src="menu.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .iphone {
+            width: 340px;
+            height: 670px;
+            background: #000;
+            border-radius: 55px;
+            position: relative;
+            padding: 12px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #ff3b30;
+            border-radius: 45px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dynamic-island {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 126px;
+            height: 37px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dynamic-island::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border-radius: 50%;
+            left: 22%;
+            border: 2px solid #1a1a1a;
+        }
+
+        .dynamic-island::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #1a1a1a;
+            border-radius: 50%;
+            right: 22%;
+        }
+
+        @keyframes islandExpand {
+            0% { width: 126px; }
+            100% { width: 200px; }
+        }
+
+        .dynamic-island:hover {
+            animation: islandExpand 0.3s ease forwards;
+            cursor: pointer;
+        }
+
+        .status-bar {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .status-icons svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .app-grid {
+            padding: 80px 20px 90px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .app-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 13px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .app-name {
+            font-size: 11px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .dock-container {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 85px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .page-dots {
+            position: absolute;
+            bottom: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .dot.active {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 应用图标样式 */
+        .facetime { background: #1cb853; }
+        .calendar { background: white; color: black; }
+        .photos { background: #ff2d55; }
+        .mail { background: #1c84ff; }
+        .clock { background: black; }
+        .maps { background: #00c73c; }
+        .weather { background: #47caff; }
+        .reminders { background: white; color: #ff3b30; }
+        .notes { background: #ffdb4c; }
+        .news { background: #ff3b30; }
+        .appstore { background: #0070f5; }
+        .podcasts { background: #ff2d55; }
+
+        /* Dock 栏应用样式 */
+        .dock-container {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 85px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        /* Dock 栏图标样式 */
+        .dock-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 13px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .phone-icon { 
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+        }
+
+        .safari-icon { 
+            background: linear-gradient(145deg, #3498db, #2980b9);
+        }
+
+        .camera-icon { 
+            background: #222;
+        }
+
+        .messages-icon { 
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+        }
+
+        /* 屏幕容器 */
+        .screens-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: visible;
+        }
+
+        /* 单个屏幕 */
+        .screen {
+            min-width: 100%;
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            border-radius: 45px;
+            position: relative;
+            overflow: hidden;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+
+        /* 不同屏幕的背景 */
+        .screen:nth-child(2) {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+        }
+
+        .screen:nth-child(3) {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+        }
+
+        .screen:nth-child(4) {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+        }
+
+        /* 滑动指示器样式优化 */
+        .page-dots {
+            position: absolute;
+            bottom: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: rgba(255, 255, 255, 0.9);
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        /* 状态栏和动态岛固定在每个屏幕上 */
+        .status-bar,
+        .dynamic-island {
+            position: absolute;
+            z-index: 1000;
+        }
+
+        /* Dock 栏和页面指示器固定在 iPhone 容器上 */
+        .dock-container,
+        .page-dots {
+            position: absolute;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone">
+        <div class="screens-container">
+            <div class="screen">
+                <div class="status-bar">
+                    <span>18:01</span>
+                    <div class="status-icons">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M17.5,12 L21,12 L21,4 L17.5,4 L17.5,12 Z M12.5,12 L16,12 L16,6 L12.5,6 L12.5,12 Z M7.5,12 L11,12 L11,8 L7.5,8 L7.5,12 Z M2.5,12 L6,12 L6,10 L2.5,10 L2.5,12 Z"/>
+                        </svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21"/>
+                        </svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16,20H8V6H16M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.67C6,21.4 6.6,22 7.33,22H16.67A1.33,1.33 0 0,0 18,20.67V5.33C18,4.6 17.4,4 16.67,4Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="dynamic-island"></div>
+                <div class="app-grid">
+                    <div class="app">
+                        <div class="app-icon facetime">FT</div>
+                        <span class="app-name">FaceTime</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon calendar">20</div>
+                        <span class="app-name">Calendar</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon photos">Ph</div>
+                        <span class="app-name">Photos</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon mail">M</div>
+                        <span class="app-name">Mail</span>
+                    </div>
+
+                    <div class="app">
+                        <div class="app-icon clock">⏰</div>
+                        <span class="app-name">Clock</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon maps">M</div>
+                        <span class="app-name">Maps</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon weather">W</div>
+                        <span class="app-name">Weather</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon reminders">R</div>
+                        <span class="app-name">Reminders</span>
+                    </div>
+
+                    <div class="app">
+                        <div class="app-icon notes">N</div>
+                        <span class="app-name">Notes</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon news">N</div>
+                        <span class="app-name">News</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon appstore">A</div>
+                        <span class="app-name">App Store</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon podcasts">P</div>
+                        <span class="app-name">Podcasts</span>
+                    </div>
+                </div>
+            </div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>18:01</span>
+                    <div class="status-icons">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M17.5,12 L21,12 L21,4 L17.5,4 L17.5,12 Z M12.5,12 L16,12 L16,6 L12.5,6 L12.5,12 Z M7.5,12 L11,12 L11,8 L7.5,8 L7.5,12 Z M2.5,12 L6,12 L6,10 L2.5,10 L2.5,12 Z"/>
+                        </svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21"/>
+                        </svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16,20H8V6H16M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.67C6,21.4 6.6,22 7.33,22H16.67A1.33,1.33 0 0,0 18,20.67V5.33C18,4.6 17.4,4 16.67,4Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="dynamic-island"></div>
+                <div class="app-grid">
+                    <div class="app">
+                        <div class="app-icon twitter" style="background: #1DA1F2;">Tw</div>
+                        <span class="app-name">Twitter</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon instagram" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">In</div>
+                        <span class="app-name">Instagram</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon facebook" style="background: #1877F2;">Fb</div>
+                        <span class="app-name">Facebook</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon linkedin" style="background: #0A66C2;">Li</div>
+                        <span class="app-name">LinkedIn</span>
+                    </div>
+                </div>
+            </div>
+            <div class="screen">
+                <div class="status-bar">
+                    <span>18:01</span>
+                    <div class="status-icons">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M17.5,12 L21,12 L21,4 L17.5,4 L17.5,12 Z M12.5,12 L16,12 L16,6 L12.5,6 L12.5,12 Z M7.5,12 L11,12 L11,8 L7.5,8 L7.5,12 Z M2.5,12 L6,12 L6,10 L2.5,10 L2.5,12 Z"/>
+                        </svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21"/>
+                        </svg>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16,20H8V6H16M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.67C6,21.4 6.6,22 7.33,22H16.67A1.33,1.33 0 0,0 18,20.67V5.33C18,4.6 17.4,4 16.67,4Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="dynamic-island"></div>
+                <div class="app-grid">
+                    <div class="app">
+                        <div class="app-icon netflix" style="background: #E50914;">Nx</div>
+                        <span class="app-name">Netflix</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon spotify" style="background: #1DB954;">Sp</div>
+                        <span class="app-name">Spotify</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon youtube" style="background: #FF0000;">Yt</div>
+                        <span class="app-name">YouTube</span>
+                    </div>
+                    <div class="app">
+                        <div class="app-icon games" style="background: #FC4F4F;">G</div>
+                        <span class="app-name">Games</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="dock-container">
+            <div class="app">
+                <div class="dock-icon phone-icon">
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="white">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="app">
+                <div class="dock-icon safari-icon">
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="white">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                        <path d="M12 4c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="app">
+                <div class="dock-icon camera-icon">
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="white">
+                        <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                        <path d="M12 17c1.65 0 3-1.35 3-3s-1.35-3-3-3-3 1.35-3 3 1.35 3 3 3z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="app">
+                <div class="dock-icon messages-icon">
+                    <svg viewBox="0 0 24 24" width="30" height="30" fill="white">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.screens-container');
+            const dots = document.querySelectorAll('.dot');
+            const screens = document.querySelectorAll('.screen');
+            let startX = 0;
+            let currentTranslate = 0;
+            let prevTranslate = 0;
+            let isDragging = false;
+            let currentScreen = 0;
+            let animationID = 0;
+
+            // 禁用默认的触摸行为
+            container.addEventListener('touchstart', (e) => e.preventDefault());
+
+            // 触摸事件监听器
+            container.addEventListener('touchstart', touchStart);
+            container.addEventListener('touchmove', touchMove);
+            container.addEventListener('touchend', touchEnd);
+
+            // 鼠标事件监听器（用于桌面端测试）
+            container.addEventListener('mousedown', touchStart);
+            container.addEventListener('mousemove', touchMove);
+            container.addEventListener('mouseup', touchEnd);
+            container.addEventListener('mouseleave', touchEnd);
+
+            function touchStart(e) {
+                startX = getPositionX(e);
+                isDragging = true;
+                animationID = requestAnimationFrame(animation);
+                container.style.cursor = 'grabbing';
+            }
+
+            function touchMove(e) {
+                if (!isDragging) return;
+                const currentPosition = getPositionX(e);
+                const diff = currentPosition - startX;
+                currentTranslate = prevTranslate + diff;
+            }
+
+            function touchEnd() {
+                isDragging = false;
+                cancelAnimationFrame(animationID);
+                container.style.cursor = 'grab';
+
+                const movedBy = currentTranslate - prevTranslate;
+                const screenWidth = container.clientWidth;
+
+                // 确定滑动方向和距离是否足够切换屏幕
+                if (Math.abs(movedBy) > screenWidth / 3) {
+                    if (movedBy > 0 && currentScreen > 0) {
+                        currentScreen--;
+                    } else if (movedBy < 0 && currentScreen < screens.length - 1) {
+                        currentScreen++;
+                    }
+                }
+
+                // 滑动到目标屏幕
+                slideTo(currentScreen);
+            }
+
+            function getPositionX(e) {
+                return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+            }
+
+            function animation() {
+                if (isDragging) {
+                    setSliderPosition();
+                    requestAnimationFrame(animation);
+                }
+            }
+
+            function setSliderPosition() {
+                // 限制滑动范围
+                const maxTranslate = -(screens.length - 1) * container.clientWidth;
+                currentTranslate = Math.max(Math.min(currentTranslate, 0), maxTranslate);
+                
+                container.style.transform = `translateX(${currentTranslate}px)`;
+            }
+
+            function slideTo(index) {
+                currentScreen = index;
+                const position = index * -container.clientWidth;
+                currentTranslate = position;
+                prevTranslate = position;
+                container.style.transition = 'transform 0.3s ease-out';
+                container.style.transform = `translateX(${position}px)`;
+                updateDots();
+
+                // 重置transition
+                setTimeout(() => {
+                    container.style.transition = 'none';
+                }, 300);
+            }
+
+            function updateDots() {
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentScreen);
+                });
+            }
+
+            // 监听屏幕大小变化
+            window.addEventListener('resize', () => {
+                slideTo(currentScreen);
+            });
+
+            // 监听过渡结束
+            container.addEventListener('transitionend', () => {
+                prevTranslate = currentTranslate;
+            });
+        });
+    </script>
+</body>
+</html> 

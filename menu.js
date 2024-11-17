@@ -8,6 +8,7 @@ function createMenu() {
             <a href="pattern.html" ${isCurrentPage('pattern.html') ? 'class="active"' : ''}>找规律</a>
             <a href="poems.html" ${isCurrentPage('poems.html') ? 'class="active"' : ''}>诗词</a>
             <a href="personality.html" ${isCurrentPage('personality.html') ? 'class="active"' : ''}>气质测试</a>
+            <a href="iphone.html" ${isCurrentPage('iphone.html') ? 'class="active"' : ''}>iPhone</a>
         </div>
     `;
 
